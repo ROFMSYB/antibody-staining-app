@@ -51,7 +51,7 @@ else:
         use_container_width=True,
         hide_index=True,
         num_rows="dynamic",
-        key="editor"
+        key="manual_editor"
     )
     st.session_state["manual_df"] = edited_df
 

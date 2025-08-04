@@ -15,15 +15,16 @@ st.title("🧬 流式抗体配方计算器")
 # 📘 表格填写说明
 with st.expander("📘 表格填写说明（点击展开）", expanded=False):
     st.markdown("""
-    | 字段 | 示例 | 必填 | 说明 |
-    |------|------|------|------|
-    | marker | CD3 | ✅ | 抗体名称 |
-    | 荧光染料 | FITC | ✅ | 荧光标签名 |
-    | 稀释比例 | 1:100 | ✅ | 格式为 `1:100`，不能写成 `%` |
-    | 是否作为FMO | 是 / 留空 | ❓ | 写“是”表示参与 FMO |
-    | 一抗/二抗/胞内抗体 | 一抗 | ✅ | 可以填写一抗/二抗/胞内抗体/自发荧光 |
+| 字段 | 示例 | 必填 | 说明 |
+|------|------|------|------|
+| marker | CD3 | ✅ | 抗体名称 |
+| 荧光染料 | FITC | ✅ | 荧光标签名 |
+| 稀释比例 | 1:100 | ✅ | 格式为 `1:100`，不能写成 `%` |
+| 是否作为FMO | 是 / 留空 | ❓ | 写“是”表示参与 FMO |
+| 一抗/二抗/胞内抗体 | 一抗 | ✅ | 可以填写一抗/二抗/胞内抗体/自发荧光 |
     """)
-    st.info("⚠️ 请确保字段名称不变，填写内容规范，请勿将live/dead和FC block计算进来，否则计算结果可能有误。")
+
+st.info("⚠️ 请确保字段名称不变，填写内容规范，请勿将live/dead和FC block计算进来，否则计算结果可能有误。")
 
 # 🌟 切换输入模式
 use_excel = st.checkbox("📁 使用 Excel 文件上传代替网页填写(需满足格式要求)", value=False)
@@ -58,7 +59,8 @@ else:
         num_rows="dynamic",
         key="manual_editor"
     )
-    st.session_state["manual_df"] = edited_df
+
+    # 不再写回 session_state，直接使用 edited_df
     if st.button("✅ 使用上方内容开始计算"):
         df = edited_df.copy()
 
@@ -88,4 +90,3 @@ if df is not None and not df.empty:
             with open(output_path, "rb") as f:
                 st.download_button("📥 下载计算结果", f, file_name="staining_result.xlsx")
             st.success("✅ 计算完成，可下载结果")
-

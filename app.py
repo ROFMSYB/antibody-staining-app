@@ -11,17 +11,14 @@ st.title("🧬 流式抗体配方计算器")
 # 🌟 切换输入模式
 use_excel = st.checkbox("📁 使用 Excel 文件上传代替网页填写(需满足格式要求)", value=False)
 
-# 🧾 初始化空白表格（用于在线填写）
-default_df = pd.DataFrame({
-    "marker": ["" for _ in range(5)],
-    "荧光染料": ["" for _ in range(5)],
-    "稀释比例": ["1:100" for _ in range(5)],
-    "是否作为FMO": ["" for _ in range(5)],
-    "一抗/二抗/胞内抗体": ["一抗" for _ in range(5)]
-})
+# ✅ 初始化空白表格（用于在线填写）
+default_df = pd.DataFrame(columns=[
+    "marker", "荧光染料", "稀释比例", "是否作为FMO", "一抗/二抗/胞内抗体"
+])
 
 if "manual_df" not in st.session_state:
     st.session_state["manual_df"] = default_df.copy()
+
 
 # 🧪 样本数输入（统一提前出现）
 sample_n = st.number_input("🔢 样本数量", min_value=1, value=50, step=1)

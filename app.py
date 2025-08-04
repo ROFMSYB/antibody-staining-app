@@ -15,7 +15,7 @@ st.title("🧬 流式抗体配方计算器")
 # 切换输入模式
 use_excel = st.checkbox("📁 使用 Excel 文件上传代替网页填写(需满足格式要求)", value=False)
 
-# 初始化空白表格
+# 初始化空白表格（只在首次加载时执行）
 default_df = pd.DataFrame({
     "marker": ["" for _ in range(5)],
     "荧光染料": ["" for _ in range(5)],
@@ -54,6 +54,8 @@ if use_excel:
             st.stop()
 else:
     st.markdown("📋 请在下方表格中填写配方信息，可复制粘贴 Excel 表格区域")
+
+    # ✅ 显示编辑器，但不立即更新 session_state
     edited_df = st.data_editor(
         st.session_state["manual_df"],
         use_container_width=True,
@@ -61,8 +63,10 @@ else:
         num_rows="dynamic",
         key="editor"
     )
-    st.session_state["manual_df"] = edited_df
+
+    # ✅ 仅在点击按钮时更新 session_state 和触发计算
     if st.button("✅ 使用上方内容开始计算"):
+        st.session_state["manual_df"] = edited_df.copy()
         df = edited_df.copy()
 
 # 校验函数

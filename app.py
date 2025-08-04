@@ -5,18 +5,28 @@ from staining_logic import (
     adjust_fmo_generic, export_to_single_sheet
 )
 
+# 页面配置
 st.set_page_config(page_title="抗体配方计算器", layout="centered")
 st.title("🧬 流式抗体配方计算器")
 
-# 🌟 切换输入模式
+# 🌟 输入方式切换（侧边栏）
 use_excel = st.sidebar.checkbox("📁 使用 Excel 文件上传代替网页填写", value=False)
 
-# ✅ 初始化空白表格（用于在线填写）
+# ✅ 初始化空白表格
 default_df = pd.DataFrame(columns=[
     "marker", "荧光染料", "稀释比例", "是否作为FMO", "一抗/二抗/胞内抗体"
 ])
 if "manual_df" not in st.session_state:
     st.session_state["manual_df"] = default_df.copy()
+
+# ✅ 初始化编辑器状态
+if "manual_editor" not in st.session_state:
+    st.session_state["manual_editor"] = st.session_state["manual_df"].copy()
+
+# ✅ 回调函数：同步编辑器数据
+def sync_editor_data():
+    if isinstance(st.session_state["manual_editor"], pd.DataFrame):
+        st.session_state["manual_df"] = st.session_state["manual_editor"].copy()
 
 # 🧪 样本数输入
 sample_n = st.number_input("🔢 样本数量", min_value=1, value=50, step=1)
@@ -42,12 +52,9 @@ if use_excel:
     if uploaded_file:
         df = load_excel_staining_plan(uploaded_file)
 else:
-    def sync_editor_data():
-        st.session_state["manual_df"] = st.session_state["manual_editor"]
-
     st.markdown("📋 请在下方表格中填写配方信息，可复制粘贴 Excel 表格区域")
     st.data_editor(
-        st.session_state["manual_df"],
+        st.session_state["manual_editor"],
         use_container_width=True,
         hide_index=True,
         num_rows="dynamic",
@@ -60,7 +67,7 @@ else:
         df["是否作为FMO"] = df["是否作为FMO"].fillna("").apply(lambda x: str(x).strip() == "是")
         df["抗体类型"] = df["一抗/二抗/胞内抗体"].fillna("一抗").apply(str.strip)
 
-# 🧮 执行计算
+# 🧮 执行计算并下载
 if df is not None and not df.empty and "marker" in df.columns:
     results = {}
     for ab_type in ["一抗", "二抗", "胞内抗体"]:

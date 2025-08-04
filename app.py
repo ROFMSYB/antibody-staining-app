@@ -9,22 +9,19 @@ st.set_page_config(page_title="抗体配方计算器", layout="centered")
 st.title("🧬 流式抗体配方计算器")
 
 # 🌟 切换输入模式
-use_excel = st.checkbox("📁 使用 Excel 文件上传代替网页填写(需满足格式要求)", value=False)
+use_excel = st.sidebar.checkbox("📁 使用 Excel 文件上传代替网页填写", value=False)
 
 # ✅ 初始化空白表格（用于在线填写）
 default_df = pd.DataFrame(columns=[
     "marker", "荧光染料", "稀释比例", "是否作为FMO", "一抗/二抗/胞内抗体"
 ])
-
 if "manual_df" not in st.session_state:
     st.session_state["manual_df"] = default_df.copy()
 
-
-# 🧪 样本数输入（统一提前出现）
+# 🧪 样本数输入
 sample_n = st.number_input("🔢 样本数量", min_value=1, value=50, step=1)
 
-# 📤 输入方式：上传 or 在线输入
-df = None
+# 📘 表格填写说明
 with st.expander("📘 表格填写说明（点击展开）", expanded=False):
     st.markdown("""
     | 字段 | 示例 | 必填 | 说明 |
@@ -37,27 +34,33 @@ with st.expander("📘 表格填写说明（点击展开）", expanded=False):
     """)
     st.info("⚠️ 请确保字段名称不变，填写内容规范，请勿将live/dead和FC block计算进来，否则计算结果可能有误。")
 
+# 📤 输入方式：上传 or 在线填写
+df = None
+
 if use_excel:
     uploaded_file = st.file_uploader("上传 staining_plan.xlsx 文件", type=["xlsx"])
     if uploaded_file:
         df = load_excel_staining_plan(uploaded_file)
 else:
+    def sync_editor_data():
+        st.session_state["manual_df"] = st.session_state["manual_editor"]
+
     st.markdown("📋 请在下方表格中填写配方信息，可复制粘贴 Excel 表格区域")
-    edited_df = st.data_editor(
+    st.data_editor(
         st.session_state["manual_df"],
         use_container_width=True,
         hide_index=True,
         num_rows="dynamic",
-        key="manual_editor"
+        key="manual_editor",
+        on_change=sync_editor_data
     )
-    st.session_state["manual_df"] = edited_df
 
     if st.button("✅ 使用上方内容开始计算"):
-        df = edited_df.copy()
+        df = st.session_state["manual_df"].copy()
         df["是否作为FMO"] = df["是否作为FMO"].fillna("").apply(lambda x: str(x).strip() == "是")
         df["抗体类型"] = df["一抗/二抗/胞内抗体"].fillna("一抗").apply(str.strip)
 
-# ✅ 若 df 成功准备，则执行计算
+# 🧮 执行计算
 if df is not None and not df.empty and "marker" in df.columns:
     results = {}
     for ab_type in ["一抗", "二抗", "胞内抗体"]:

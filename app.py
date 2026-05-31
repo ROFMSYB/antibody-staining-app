@@ -1,4 +1,16 @@
-import streamlit as st
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # Help static analyzers / linters resolve the import during type checking
+    import streamlit as st  # pragma: no cover
+
+try:
+    import streamlit as st  # type: ignore
+except Exception:  # pragma: no cover - friendly error when Streamlit is not installed in linting env
+    # Provide a clear runtime error for missing Streamlit while keeping static analyzers happy.
+    raise ImportError(
+        "Streamlit is required to run this app. Install with: pip install streamlit"
+    )
 import pandas as pd
 from staining_logic import (
     load_excel_staining_plan,
@@ -128,7 +140,7 @@ if df is not None and not df.empty:
                     adjusted = adjust_fmo_generic(prepared_df, df_sub)
                     results[ab_type] = compute_staining(adjusted, df_sub, sample_n)
 
-                        output_path = "staining_result.xlsx"
+            output_path = "staining_result.xlsx"
             export_to_single_sheet(results, output_path)
             html_report = build_printable_html_report(
                 results,

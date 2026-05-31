@@ -128,9 +128,9 @@ if df is not None and not df.empty:
                     adjusted = adjust_fmo_generic(prepared_df, df_sub)
                     results[ab_type] = compute_staining(adjusted, df_sub, sample_n)
 
-            output_path = "staining_result.xlsx"
+                        output_path = "staining_result.xlsx"
             export_to_single_sheet(results, output_path)
-                        html_report = build_printable_html_report(
+            html_report = build_printable_html_report(
                 results,
                 sample_n,
                 report_meta={
@@ -141,7 +141,6 @@ if df is not None and not df.empty:
             )
             pdf_report = html_to_pdf_bytes(html_report)
 
-
         st.success("✅ 计算完成！下方可直接查看报告，或下载 Excel / 打印版 HTML。")
 
         st.markdown("## 📑 网页报告")
@@ -149,7 +148,7 @@ if df is not None and not df.empty:
             if label in results:
                 render_report_section(label, results[label])
 
-                d1, d2, d3 = st.columns(3)
+        d1, d2, d3 = st.columns(3)
         with d1:
             with open(output_path, "rb") as f:
                 st.download_button("📥 下载 Excel 结果", f, file_name="staining_result.xlsx")
@@ -170,6 +169,7 @@ if df is not None and not df.empty:
                 )
             else:
                 st.caption("未检测到 PDF 引擎（可选安装：weasyprint）")
+
 
 
 
